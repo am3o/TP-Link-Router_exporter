@@ -1,0 +1,121 @@
+version: 2
+
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+
+builds:
+  - goos:
+      - 'linux'
+    goarch:
+      - 'amd64'
+      - 'arm'
+      - 'arm64'
+    goarm:
+      - '6'
+      - '7'
+    tags:
+      - netgo
+      - osusergo
+    goarm64:
+      - v8.0
+    gcflags:
+      - all=-trimpath
+    ldflags:
+      - -s -w -X main.Version={{.Version}}
+
+archives:
+  - formats: [tar.gz]
+    # this name template makes the OS and Arch compatible with the results of `uname`.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+checksum:
+  name_template: 'checksums.txt'
+
+dockers:
+  - image_templates:
+    - "ghcr.io/am3o/tp-link-router-exporter:{{ .Version }}-amd64"
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/amd64
+      - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+      - --label=org.opencontainers.image.licenses=MIT
+      - --label=org.opencontainers.image.name={{.ProjectName}}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.source={{ .GitURL }}
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --pull
+
+  - image_templates:
+      - "ghcr.io/am3o/tp-link-router-exporter:{{ .Version }}-arm64"
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/arm64/v8
+      - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+      - --label=org.opencontainers.image.licenses=MIT
+      - --label=org.opencontainers.image.name={{.ProjectName}}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.source={{ .GitURL }}
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --pull
+
+  - image_templates:
+      - "ghcr.io/am3o/tp-link-router-exporter:{{ .Version }}-armv6"
+    goarm: 6
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/arm/v6
+      - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+      - --label=org.opencontainers.image.licenses=MIT
+      - --label=org.opencontainers.image.name={{.ProjectName}}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.source={{ .GitURL }}
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --pull
+
+  - image_templates:
+      - "ghcr.io/am3o/tp-link-router-exporter:{{ .Version }}-armv7"
+    goarch: arm
+    goos: linux
+    goarm: 7
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/arm/v7
+      - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+      - --label=org.opencontainers.image.licenses=MIT
+      - --label=org.opencontainers.image.name={{.ProjectName}}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.source={{ .GitURL }}
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --pull
+
+docker_manifests:
+  - name_template: ghcr.io/am3o/tp-link-router-exporter:{{ .Tag }}
+    image_templates:
+      - ghcr.io/am3o/tp-link-router-exporter:{{ .Version }}-amd64
+      - ghcr.io/am3o/tp-link-router-exporter:{{ .Version }}-arm64
+      - ghcr.io/am3o/tp-link-router-exporter:{{ .Version }}-armv7
+      - ghcr.io/am3o/tp-link-router-exporter:{{ .Version }}-armv6
+  - name_template: ghcr.io/am3o/tp-link-router-exporter:latest
+    image_templates:
+      - ghcr.io/am3o/tp-link-router-exporter:{{ .Version }}-amd64
+      - ghcr.io/am3o/tp-link-router-exporter:{{ .Version }}-arm64
+      - ghcr.io/am3o/tp-link-router-exporter:{{ .Version }}-armv7
+      - ghcr.io/am3o/tp-link-router-exporter:{{ .Version }}-armv6
