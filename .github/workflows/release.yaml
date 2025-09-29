@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 env:
   # Common versions
@@ -112,5 +113,5 @@ jobs:
           distribution: goreleaser
           version: "~> v2"
           args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
